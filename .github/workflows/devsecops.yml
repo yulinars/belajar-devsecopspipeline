@@ -112,5 +112,15 @@ jobs:
 
             # TAMBAHAN 3: Smoke Test setelah deploy
             - name: Smoke Test (Health Check)
-              run: |
-                  curl --fail --retry 5 --retry-delay 3 --retry-connrefused http://localhost:5000/health
+               run: |
+                  for i in $(seq 1 15); do
+                      if curl --fail --silent http://localhost:5000/health; then
+                          echo "Aplikasi sehat"
+                          exit 0
+                      fi
+                      echo "Menunggu aplikasi siap ($i/15)..."
+                      sleep 2
+                  done
+                  echo "Smoke test gagal. Log container:"
+                  docker logs web-flask
+                  exit 1
